@@ -24,10 +24,6 @@ import keras.callbacks
 def buildmodel():
     print("Building...")
     model = Sequential()
-    img_channels=1
-    img_rows=84
-    img_cols=84
-    model=Sequential()
     model.add(Conv2D(32, (8, 8), activation='relu', input_shape=(84, 84, 4),strides=(4, 4)))
     model.add(Conv2D(64, (4, 4), activation='relu', input_shape=(32, 20, 20),strides=(2, 2)))
     model.add(Conv2D(64, (3, 3), activation='relu', input_shape=(64, 9, 9)))
