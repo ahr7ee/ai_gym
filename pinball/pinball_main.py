@@ -6,7 +6,9 @@ from skimage.color import rgb2gray
 from skimage.transform import resize
 from skimage.exposure import rescale_intensity
 from collections import deque
-import pylab
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
 #Create the environment
 
 import numpy as np
@@ -70,7 +72,7 @@ class DQNAgent:
             update_input[i] = history
         
         filepath="weights_min_loss.hdf5"
-        checkpoint = ModelCheckpoint(filepath, monitor='loss', save_best_only=True, mode='min')
+        checkpoint = ModelCheckpoint(filepath, monitor='loss',save_weights_only=True ,save_best_only=True, mode='min')
         callbacks_list = [checkpoint]
         model.fit(update_input, update_target, batch_size=batch_size, epochs=1,callbacks=callbacks_list,verbose=False)
 
@@ -96,14 +98,14 @@ def buildmodel():
     model.add(Dense(512,activation='relu'))
     model.add(Dense(9,activation='linear'))
     print model.summary()
-    adam=Adam(lr=0.0025)
+    adam=Adam(lr=0.00025)
     model.compile(loss='mean_squared_error', optimizer=adam)
     print("Model Built")
     return model
 
 model=buildmodel()
 target_model=buildmodel()
-
+model.load_weights('weights_min_loss.hdf5')
 
 num_episodes=1000
 #steps=10
@@ -124,7 +126,7 @@ for e in range(num_episodes):
     state = img2array(state)
     stacked_image = np.append(state, stacked_image[:, :, :, :3], axis=3)
     while not done:
-        env.render()
+        #env.render()
         old_state=stacked_image
         action = agent.get_action(old_state)
         next_state, reward, done, info = env.step(action)
@@ -150,8 +152,8 @@ for e in range(num_episodes):
             env.reset()
             scores.append(score)
             episodes.append(e)
-            pylab.plot(episodes, scores, 'b')
-            pylab.savefig("Pinball_DQN.png")
+            plt.plot(episodes, scores, 'b')
+            plt.savefig("Pinball_DQN.png")
             print("episode:", e, "  score:", score, "  memory length:", len(memory),
                   "  epsilon:", agent.epsilon)
     model.save_weights('weights_after_episodes.hdf5')
