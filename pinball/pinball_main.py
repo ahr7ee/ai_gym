@@ -1,3 +1,11 @@
+"""
+Developed by : Gautam Somappa
+This is the main python code that trains a model to learn pinball and later on work by itself.
+
+Best worked with a GPU
+"""
+# Import all packages
+
 import gym
 import numpy as np
 import scipy
@@ -74,7 +82,7 @@ class DQNAgent:
             update_target[i] = target
             update_input[i] = history
         
-        filepath="test2.hdf5"
+        filepath="saved.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='loss',save_weights_only=True ,save_best_only=True, mode='min')
         callbacks_list = [checkpoint]
         model.fit(update_input, update_target, batch_size=batch_size, epochs=100,callbacks=callbacks_list,verbose=False)
@@ -108,7 +116,7 @@ def buildmodel():
     return model
 model=buildmodel()
 target_model=buildmodel()
-model.load_weights('pinball/weights_low_epsilon/PinBall_DQN4day.hdf5')
+model.load_weights('')
 num_episodes=1000
 #steps=10
 memory = deque(maxlen=400000)
@@ -130,7 +138,7 @@ for e in range(num_episodes):
         #env.render()
         old_state=stacked_image
         action = agent.get_action(old_state)
-        print action
+        # print action
         next_state, reward, done, info = env.step(action)
         next_state = img2array(next_state)
         stacked_image = np.append(next_state, stacked_image[:, :, :, :3], axis=3)
@@ -158,4 +166,4 @@ for e in range(num_episodes):
             plt.savefig("Pinball_DQN.png")
             print("episode:", e, "  score:", score, "  memory length:", len(memory),
                   "  epsilon:", agent.epsilon)
-    model.save_weights('Test.hdf5')
+    model.save_weights('saved.hdf5')
