@@ -116,7 +116,6 @@ def buildmodel():
     return model
 model=buildmodel()
 target_model=buildmodel()
-model.load_weights('')
 num_episodes=1000
 #steps=10
 memory = deque(maxlen=400000)

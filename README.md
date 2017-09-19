@@ -26,7 +26,7 @@ env.render()
 ## How the model works
 The mode implements a deeepQ learning model and CNN to train stacks of four images and learns from the visual features.
 
-The report for this repo can be found here: [title](http://)
+The report for this repo can be found here: [Reinforcement Learning Report](pinball/images/Reinforcement_Learning_Paper.pdf)
 
 ## Running the code
 To run the code that trains and saves the model, run the following code
