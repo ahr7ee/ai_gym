@@ -1,21 +1,19 @@
 import gym
 import numpy as np
-env = gym.make('CartPole-v0')
+import random
+env = gym.make('VideoPinball-v0')
 best_reward=0
-parameters = np.random.rand(4) * 2 - 1
-for i_episode in range(300):
+list1=[]
+for i_episode in range(2):
+    env.render()
     observation = env.reset()
-    calculate_reward=0
-    for t in range(250):
+    action=random.randrange(9)
+    observation, reward, done, info = env.step(action)
+    while not done:
         env.render()
-        #action = env.action_space.sample()
-        action = 0 if np.matmul(parameters,observation) < 0 else 1
+        action=random.randrange(9)
         observation, reward, done, info = env.step(action)
-        calculate_reward=calculate_reward+reward
-        if done:
-            break
-    if calculate_reward>best_reward:
-        best_reward=calculate_reward
-        best_param=parameters
-print best_reward
-print best_param
+        list1.append(int(reward))
+reward=set(list1)
+
+print reward

@@ -17,7 +17,7 @@ from keras.layers import Input,Dense,Conv2D,Flatten
 from keras.activations import relu,linear
 from keras.models import Sequential
 import keras.preprocessing.image
-from keras.optimizers import SGD,Adam
+from keras.optimizers import SGD,Adam,RMSprop
 from keras.callbacks import ModelCheckpoint
 
 from keras.callbacks import History 
@@ -27,20 +27,23 @@ history = History()
 
 class DQNAgent:
     def __init__(self):
-        self.epsilon = 1.0
+        self.epsilon = 0.05
         self.epsilon_start = 1.0
         self.epsilon_end = 0.1
-        self.epsilon_decay = 1000000.
+        self.epsilon_decay = 10000.
         self.epsilon_decay_step = (self.epsilon_start - self.epsilon_end) / self.epsilon_decay
         self.batch_size=32
         self.train_start=1000
         self.discount_factor=0.99
+        self.length=400000
         
     def get_action(self,stacked_image):
-        if random.random() <= self.epsilon:
-            action=random.randrange(9)
+        if random.random() <=self.epsilon:
+                print "Random"
+                action=random.randrange(9)
         else:
-            q = model.predict(stacked_image)       
+            q = model.predict(stacked_image) 
+            print "Calculated"      
             max_Q = np.argmax(q)
             action = max_Q
         return action
@@ -71,10 +74,10 @@ class DQNAgent:
             update_target[i] = target
             update_input[i] = history
         
-        filepath="weights_min_loss.hdf5"
+        filepath="test2.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='loss',save_weights_only=True ,save_best_only=True, mode='min')
         callbacks_list = [checkpoint]
-        model.fit(update_input, update_target, batch_size=batch_size, epochs=1,callbacks=callbacks_list,verbose=False)
+        model.fit(update_input, update_target, batch_size=batch_size, epochs=100,callbacks=callbacks_list,verbose=False)
 
 
     def update_target_model(self):
@@ -89,24 +92,23 @@ def img2array(state):
     return state
 
 def buildmodel():
-    print("Building...")
     model = Sequential()
-    model.add(Conv2D(32, (8, 8), activation='relu', input_shape=(84, 84, 4),strides=(4, 4)))
-    model.add(Conv2D(64, (4, 4), activation='relu',strides=(2, 2)))
-    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(Conv2D(32, (8, 8), input_shape=(84, 84, 4), activation='relu', strides=(4, 4),
+                        kernel_initializer='glorot_uniform'))
+    model.add(Conv2D(64, (4, 4), activation='relu', strides=(2, 2),
+                        kernel_initializer='glorot_uniform'))
+    model.add(Conv2D(64, (3, 3), activation='relu', strides=(1, 1),
+                        kernel_initializer='glorot_uniform'))
     model.add(Flatten())
-    model.add(Dense(512,activation='relu'))
-    model.add(Dense(9,activation='linear'))
-    print model.summary()
-    adam=Adam(lr=0.00025)
-    model.compile(loss='mean_squared_error', optimizer=adam)
-    print("Model Built")
+    model.add(Dense(512, activation='relu', kernel_initializer='glorot_uniform'))
+    model.add(Dense(9))
+    model.summary()
+    model.compile(loss='mse', optimizer=RMSprop(
+        lr=0.025, rho=0.95, epsilon=0.01))
     return model
-
 model=buildmodel()
 target_model=buildmodel()
-model.load_weights('weights_min_loss.hdf5')
-
+model.load_weights('pinball/weights_low_epsilon/PinBall_DQN4day.hdf5')
 num_episodes=1000
 #steps=10
 memory = deque(maxlen=400000)
@@ -114,7 +116,6 @@ env = gym.make('VideoPinball-v0')
 env.reset()
 stacked_image=np.empty(shape=(1,84,84,4))
 agent = DQNAgent()
-memory=[]
 scores, episodes, global_step = [], [], 0
 
 for e in range(num_episodes):
@@ -129,6 +130,7 @@ for e in range(num_episodes):
         #env.render()
         old_state=stacked_image
         action = agent.get_action(old_state)
+        print action
         next_state, reward, done, info = env.step(action)
         next_state = img2array(next_state)
         stacked_image = np.append(next_state, stacked_image[:, :, :, :3], axis=3)
@@ -156,4 +158,4 @@ for e in range(num_episodes):
             plt.savefig("Pinball_DQN.png")
             print("episode:", e, "  score:", score, "  memory length:", len(memory),
                   "  epsilon:", agent.epsilon)
-    model.save_weights('weights_after_episodes.hdf5')
+    model.save_weights('Test.hdf5')
