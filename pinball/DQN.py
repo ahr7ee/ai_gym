@@ -21,7 +21,7 @@ class DQNAgent:
         self.state_size = (84, 84, 4)
         self.action_size = 9
 
-        self.epsilon = 1.0
+        self.epsilon = 0.1
         self.epsilon_start = 1.0
         self.epsilon_end = 0.1
         self.epsilon_decay = 10000.
@@ -29,10 +29,10 @@ class DQNAgent:
             (self.epsilon_start - self.epsilon_end) / self.epsilon_decay
 
         self.batch_size = 32
-        self.train_start = 20000
-        self.update_target_rate = 10000
+        self.train_start = 200
+        self.update_target_rate = 100
         self.discount_factor = 0.99
-        self.memory = deque(maxlen=400000)
+        self.memory = deque(maxlen=400)
         self.no_op_steps = 30
         self.learning_rate = 0.00025
         self.momentum = 0.95
@@ -40,7 +40,7 @@ class DQNAgent:
 
         self.model = self.build_model()
         self.target_model = self.build_model()
-        #self.model.load_weights("pinball/weights_low_epsilon/weights_after_episodes1.hdf5")
+        self.model.load_weights("pinball/weights_low_epsilon/Pinball_DQN4day.hdf5")
         self.update_target_model()
 
     def build_model(self):
@@ -99,7 +99,7 @@ class DQNAgent:
             update_target[i] = target
             update_input[i] = history
 
-        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        #self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
     def load_model(self, name):
         self.model.load_weights(name)
