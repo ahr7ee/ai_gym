@@ -3,6 +3,8 @@ Developed by : Gautam Somappa
 This is the main python code that trains a model to learn pinball and later on work by itself.
 
 Best worked with a GPU
+
+Deep-Q-learning code is from this repository: https://github.com/keon/deep-q-learning
 """
 # Import all packages
 
